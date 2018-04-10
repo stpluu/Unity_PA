@@ -4,7 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using UnityEngine;
-
+// stage text file loading
 public class StageLoader : MonoBehaviour {
 	private WorldScript worldScript_;
 	string loadingFilePath_;
