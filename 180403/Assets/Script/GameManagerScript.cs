@@ -96,8 +96,8 @@ public class GameManagerScript : MonoBehaviour {
 		{
 			itemInventory_[i] = 0;
 		}
-		//currentStage_ = 1;
 	}
+
     // Use this for initialization
     void Start () {
         stageStartTime_ = Time.time;
@@ -141,11 +141,12 @@ public class GameManagerScript : MonoBehaviour {
 
 		bInGoal_ = false;
 
+		/// for debug
 		if (getCurrentStage() < 1
 			|| getCurrentStage() > 2)
 			setCurrentStage(1);
-		//currentStage_ = 1;
-		//worldScript_.loadStage(currentStage_);
+		/// 
+
 		stageLoader_.LoadStage(StageLoader.StageStyle.orignal, currentStage_);
 		shopScript_.SetShopStage(currentStage_);
 		shopScript_.SetShopUIVisible(false);
@@ -169,12 +170,7 @@ public class GameManagerScript : MonoBehaviour {
    
     void UpdateUI()
     {
-        // speed Text
-        //string speedText = "";
-        //for (int i = 0; i < playerScript_.speed_; ++ i)
-        //{
-          //  speedText = speedText + "|";
-       // }
+
 	   if (playerScript_.speed_ > Constant.Speed_Max_Lv1)
 		{
 			SpeedText_.color = new Color(255, 50, 50);
@@ -276,6 +272,14 @@ public class GameManagerScript : MonoBehaviour {
 				}
 				break;
 			default:
+				// not yet ... return crack object
+				foreach (GameObject obj in crackPool_)
+				{
+					if (obj.activeSelf == false)
+					{
+						return obj;
+					}
+				}
 				break;
 		}
         return null;

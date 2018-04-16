@@ -3,7 +3,6 @@ tile=spring_forest
 time=200
 distance=600
 </stage>
-
 // 스테이지 정보
 // 나타나는 위치(캐릭터에 닿는 위치 기준, 실제로는 일정거리 먼저 등장), 오브젝트 종류, x축 위치
 <objects>

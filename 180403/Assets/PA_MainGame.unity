@@ -6898,6 +6898,7 @@ GameObject:
   - component: {fileID: 1939140890}
   - component: {fileID: 1939140891}
   - component: {fileID: 1939140892}
+  - component: {fileID: 1939140893}
   m_Layer: 0
   m_Name: GameManager
   m_TagString: GameController
@@ -6958,11 +6959,23 @@ MonoBehaviour:
   goal_: {fileID: 1775085236164018, guid: 4611229b49e393848a4a4903c47f4d91, type: 2}
   fishPool_: []
   largeHolePool_: []
+  fishHolePool_: []
   crackPool_: []
   rockPool_: []
   shopPool_: []
   fishCount_: 0
   itemInventory_: 
+--- !u!114 &1939140893
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 1939140889}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 93a263b94dc27b44d97de55694bff514, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1942290007
 GameObject:
   m_ObjectHideFlags: 0

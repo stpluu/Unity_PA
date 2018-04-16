@@ -1,10 +1,23 @@
 fileFormatVersion: 2
 guid: b0d7ea1657a6ff34181066e447145e42
-timeCreated: 1508553484
+timeCreated: 1523375665
 licenseType: Free
 MonoImporter:
   serializedVersion: 2
-  defaultReferences: []
+  defaultReferences:
+  - fish_: {fileID: 1721530876860356, guid: ffdfe33db2089c84faef5eb0a09375ed, type: 2}
+  - heart_: {fileID: 1721530876860356, guid: ffdfe33db2089c84faef5eb0a09375ed, type: 2}
+  - large_hole_: {fileID: 1206772065564064, guid: fd4e582cb6ddc734e87336a794a58fee,
+      type: 2}
+  - fish_hole_: {fileID: 1241779842671916, guid: eba90877cd49b994d93b6782910bd5aa,
+      type: 2}
+  - crack_: {fileID: 1408564581649242, guid: f1841946e2d70a842ba17d84b67a036e, type: 2}
+  - rock_: {fileID: 1795231065763382, guid: 95ee25c5239ed4040924191e1a1bf467, type: 2}
+  - shop_: {fileID: 1477546112205956, guid: 340356efcffdc7a4381960fae95dba47, type: 2}
+  - tree_: {fileID: 1795231065763382, guid: 95ee25c5239ed4040924191e1a1bf467, type: 2}
+  - warp_: {fileID: 1477546112205956, guid: 340356efcffdc7a4381960fae95dba47, type: 2}
+  - wing_: {fileID: 1721530876860356, guid: ffdfe33db2089c84faef5eb0a09375ed, type: 2}
+  - goal_: {fileID: 1775085236164018, guid: 4611229b49e393848a4a4903c47f4d91, type: 2}
   executionOrder: 0
   icon: {instanceID: 0}
   userData: 

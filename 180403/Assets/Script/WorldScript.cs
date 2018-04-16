@@ -4,7 +4,7 @@ using UnityEngine;
 
 static partial class Constant
 {
-    public const int Distance_ObjectAppear_ =  20;
+    public const int Distance_ObjectAppear_ =  15;
     public const int Distance_ObjectDisappear = 5;
     public const int Distance_MonsterAppear_ = 20;
 	public const float Speed_WorldScrool = 0.3f;
@@ -48,53 +48,43 @@ public class WorldScript : MonoBehaviour {
         Swimming,
 
     };
-   
-    //public int stage_;      //스테이지 번호
     public float distance_;   //진행한 거리
 
     public int curveDirection_; //맵이 구부러지고 있는 방향 : -1 : 좌, 0 : 직진, 1 : 우측
 
-    public int stageMaxDistance_;
-    public int stageMaxTime_;
-    private StageStyle stageStyle_;
+    public int stageMaxDistance_;	//스테이지 전체 길이
+    public int stageMaxTime_;		//스테이지 제한시간
+    private StageStyle stageStyle_;	//스테이지 종류 (숲/눈/황무지/동굴/남극/수중/수면...)
 
-    //public GameObject L_Hole_;
-    //public GameObject Crack_;
-    //public GameObject Goal_;
-    //public GameObject FishHole_;
-	//public GameObject Rock_;
-	//public GameObject ShopHole_;
-
-    private GameObject backGround_;
+    private GameObject backGround_;	//배경 오브젝트
     private Sprite[] bgSprites_;    //배경 이미지들 (12개 한세트, 0~3 : 직진, 4~7 : 좌회전중, 8~11 : 우회전중)
-    private int currentBgNum_;
+    private int currentBgNum_;      //현재 렌더링 되는 배경 이미지
 
 	[System.Serializable]
-    struct MapObjectStruct
-    {
-        public Constant.MapObjects objectType_;
-        public int distance_; //오브젝트 위치
-        public int horizonalPosition_; //등장시 왼쪽/오른쪽 위치
-        public GameObject object_;
-		public bool bReady_;
-
+	struct MapObjectStruct
+	{
+		public Constant.MapObjects objectType_;
+		public int distance_;           //오브젝트가 나타날 위치
+		public int horizonalPosition_;  //등장시 왼쪽/오른쪽 위치, 혹은 좌표
+		public GameObject object_;      //게임 오브젝트 본체
+		public bool bReady_;            //
 		public void SetReady(bool bReady)
 		{
 			bReady_ = bReady;
 		}
     };
-    private int speedKeyInputTime_;
 
-    private List<MapObjectStruct> objectList_;
-	// Use this for initialization
-	bool bGoal_;
+    private List<MapObjectStruct> objectList_;	//맵 오브젝트 리스트
+
+	private int speedKeyInputTime_;     //스피드 업/다운 키를 누른 시간
+
+	bool bGoal_;						//스테이지 목표에 도착 했는가?
 
 	public bool SetStageStyle(string stageType)
 	{
 		if (stageType.Equals("spring_forest"))
 		{
 			stageStyle_ = StageStyle.SpringForest;
-			return true;
 		}
 		else if (stageType.Equals("cave"))
 		{
@@ -124,8 +114,38 @@ public class WorldScript : MonoBehaviour {
 		{
 			return false;
 		}
+
+		switch (stageStyle_)
+		{
+			case StageStyle.SpringForest:
+				for (int i = 0; i < Constant.Number_BackGroundImg; ++i)
+				{
+					string spriteName = string.Format("Sprites/Spring_Forest/BG_{0:D2}", i + 1);
+
+					bgSprites_[i] = Resources.Load(spriteName, typeof(Sprite)) as Sprite;
+				}
+				backGround_.GetComponent<SpriteRenderer>().sprite = bgSprites_[currentBgNum_];
+				break;
+			case StageStyle.Cave:
+				for (int i = 0; i < Constant.Number_BackGroundImg; ++i)
+				{
+					string spriteName = string.Format("Sprites/Cave/BG_{0:D2}", i + 1);
+
+					bgSprites_[i] = Resources.Load(spriteName, typeof(Sprite)) as Sprite;
+				}
+				backGround_.GetComponent<SpriteRenderer>().sprite = bgSprites_[currentBgNum_];
+				break;
+			default:
+				for (int i = 0; i < Constant.Number_BackGroundImg; ++i)
+				{
+					bgSprites_[i] = Resources.Load("Sprites/Spring_Forest/BG_{0:D2}" + i + 1, typeof(Sprite)) as Sprite;
+				}
+				backGround_.GetComponent<SpriteRenderer>().sprite = bgSprites_[currentBgNum_];
+				break;
+		}
 		return true;
 	}
+
 	public bool addObject(int distance,	string objectType, int hPos)
 	{
 		if (stageMaxDistance_ <= 0
@@ -134,11 +154,15 @@ public class WorldScript : MonoBehaviour {
 		
 		// 오브젝트 생성(실제생성은 나중에)
 		MapObjectStruct obj = new MapObjectStruct();
-
+		
 		///////////////////////////////////////////////////////////////
 		if (objectType.Equals("boss"))
 		{
 			obj.objectType_ = Constant.MapObjects.BOSS;
+		}
+		else if (objectType.Equals("fish_hole"))
+		{
+			obj.objectType_ = Constant.MapObjects.FISH_HOLE;
 		}
 		else if (objectType.Equals("crack"))
 		{
@@ -533,40 +557,27 @@ public class WorldScript : MonoBehaviour {
     private void updateObjectPosition()
     {
         int iDistance = (int)distance_;
-        //Debug.Log("Update Obj Position  : " + iDistance.ToString());
         Vector3 curPostionVector = new Vector3();
-		//foreach(MapObjectStruct obj in objectList_)
+
 		for (int i = 0; i < objectList_.Count; ++i)
 		{
-			//if (obj.object_.activeSelf == true)
-			//{
-			//	if (iDistance > obj.distance_ + Constant.Distance_ObjectDisappear)
-			//	{
-			//		obj.object_.SetActive(false);
-			//		continue;
-			//	}
-			//}
+
 			MapObjectStruct mapObj = objectList_[i];
-            //너무 멀리 있는 오브젝트도 패스
+            //너무 멀리 있는 오브젝트 패스
             if (iDistance < mapObj.distance_ - Constant.Distance_ObjectAppear_)
                 break ;
-			if (iDistance > mapObj.distance_ + Constant.Distance_ObjectDisappear
-				&& mapObj.object_ != null)
+			if (iDistance > mapObj.distance_ + Constant.Distance_ObjectDisappear)
 			{
-				//objectList_[i].SetReady(false);
-				mapObj.object_.SetActive(false);
-				mapObj.object_ = null;
+				if (mapObj.object_ != null)
+				{
+					mapObj.object_.SetActive(false);
+					Debug.Log("object deactived : " + mapObj.distance_.ToString() + " type : " + mapObj.objectType_.ToString());
+					mapObj.object_ = null;
+					objectList_[i] = mapObj;
+				}	
 				continue;
 			}
-			// 거리에 들어왔는데 
-			//if (objectList_[i].bReady_ == false)
-			//{
 
-			//}
-			//if (obj.object_.activeSelf == false)
-			//{
-			//    Debug.Log("Obj Activatie : " + obj.objectType_.ToString() + " " + obj.distance_.ToString());
-			//}
 			// 여기서부턴 거리에 들어와있는 오브젝트들
 			if (mapObj.object_ == null)
 			{
@@ -574,12 +585,19 @@ public class WorldScript : MonoBehaviour {
 					= GameObject.FindGameObjectWithTag(
 						"GameController").GetComponent<GameManagerScript>().GetMapObjectInstance(mapObj.objectType_);
 				if (mapObj.object_ == null)
+				{
+					Debug.LogError("map object get error - dist : " + mapObj.distance_.ToString()
+						+ " type : " + mapObj.objectType_.ToString());
 					continue;
+				}
+				if (mapObj.objectType_ == Constant.MapObjects.SHOP_EXPENSIVE
+					|| mapObj.objectType_ == Constant.MapObjects.SHOP_NORMAL
+					|| mapObj.objectType_ == Constant.MapObjects.SHOP_SANTA)
+				{
+					mapObj.object_.GetComponent<ShopHoleScript>().SetShopType(mapObj.objectType_);
+				}
 				mapObj.object_.SetActive(true);
 			}
-			
-			
-
 			curPostionVector.x = calcObjectXPos(mapObj.objectType_, mapObj.horizonalPosition_, mapObj.distance_);
             curPostionVector.y = calcObjectYPos(mapObj.objectType_, mapObj.distance_);
             curPostionVector.z = calcObjectZpos(mapObj.objectType_, mapObj.distance_);
@@ -596,16 +614,21 @@ public class WorldScript : MonoBehaviour {
             currentBgNum_ -= 4;
         backGround_.GetComponent<SpriteRenderer>().sprite = bgSprites_[currentBgNum_];
     }
+
+	// 현재 거리 갱신
     public void updateDistance(int speed)
     {
         float FrameDistance = Time.deltaTime * ((float)speed * Constant.Speed_WorldScrool);
         float prevDistance = distance_;
         distance_ += FrameDistance;
+		// 1.0단위로 bg / object 위치를 업데이트 한다(끊어지는 듯한 연출)
         if ((int)(distance_) > (int)prevDistance)
         {
             updateObjectPosition();
             updateBG();
         }
+
+		// 최종 거리 도달할경우 골인 처리 시작
 		if (bGoal_ == false
 			&& distance_ >= stageMaxDistance_ )
 		{
@@ -633,6 +656,8 @@ public class WorldScript : MonoBehaviour {
         }
         curveDirection_ = objDirection;
     }
+
+	// 각 오브젝트에 맞는 x축 거리를 계산한다, (파일에는 x위치가 int 단위임)
     float calcObjectXPos(Constant.MapObjects objType, int hPos, int dist)
     {
         switch(objType)
@@ -676,6 +701,8 @@ public class WorldScript : MonoBehaviour {
         }
         return 0.0f;
     }
+
+	// 
     float calcObjectYPos(Constant.MapObjects objType, int dist)
     {
         int distFromCurPos = dist - (int)distance_;

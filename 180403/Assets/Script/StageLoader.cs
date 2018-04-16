@@ -4,7 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using UnityEngine;
-// stage text file loading
+
 public class StageLoader : MonoBehaviour {
 	private WorldScript worldScript_;
 	string loadingFilePath_;
@@ -44,16 +44,16 @@ public class StageLoader : MonoBehaviour {
 		switch (stageStyle)
 		{
 			case StageStyle.orignal:
-				stageFolder = "StageData/OriginalStages/";
+				stageFolder = "Assets/Resources/StageData/OriginalStages/";
 				break;
 			case StageStyle.hard:
-				stageFolder = "StageData/HardStages/";
+				stageFolder = "Assets/Resources/StageData/HardStages/";
 				break;
 			case StageStyle.custom:
-				stageFolder = "StageData/CustomStages/";
+				stageFolder = "Assets/Resources/StageData/CustomStages/";
 				break;
 			default:
-				stageFolder = "StageData/OriginalStages/";
+				stageFolder = "Assets/Resources/StageData/OriginalStages/";
 				break;
 		}
 		loadingFilePath_ = stageFolder + string.Format("{0:D2}.txt", stageNum);
@@ -68,26 +68,6 @@ public class StageLoader : MonoBehaviour {
 			{
 				currentLine.Trim();
 				parcingLineNum_++;
-				switch (parcingTag)
-				{
-					case TagType.monsters:
-						ProcessMonsterLine(currentLine);
-						break;
-					case TagType.objects:
-						ProcessObjectLine(currentLine);
-						break;
-					case TagType.stage:
-						ProcessStageLine(currentLine);
-						break;
-					case TagType.NONE:
-					default:
-						{
-							ParseError(currentLine, "unknown open tag");
-						}
-						break;
-				}
-
-
 				if (IsComment(currentLine))
 				{
 					continue;
@@ -102,6 +82,25 @@ public class StageLoader : MonoBehaviour {
 					}
 					continue;
 				}
+				switch (parcingTag)
+				{
+					case TagType.monsters:
+						ProcessMonsterLine(currentLine);
+						break;
+					case TagType.objects:
+						ProcessObjectLine(currentLine);
+						break;
+					case TagType.stage:
+						ProcessStageLine(currentLine);
+						break;
+					case TagType.NONE:
+					default:
+						{
+							//ParseError(currentLine, "unknown open tag");
+						}
+						break;
+				}
+
 				if (IsOpenTag(currentLine))
 				{
 					if (parcingTag != TagType.NONE)
