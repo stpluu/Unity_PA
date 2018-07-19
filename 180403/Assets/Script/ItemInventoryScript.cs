@@ -41,4 +41,16 @@ public class ItemInventoryScript : MonoBehaviour {
 		}
 		
 	}
+
+	public static float GetItemAbility(Constant.ItemDef itemName)
+	{
+		switch(itemName)
+		{
+			case Constant.ItemDef.Ring:
+				break;
+			default:
+				return 0.0f;
+		}
+		return 0.0f;
+	}
 }

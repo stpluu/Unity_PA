@@ -147,7 +147,7 @@ public class GameManagerScript : MonoBehaviour {
 			setCurrentStage(1);
 		/// 
 
-		stageLoader_.LoadStage(StageLoader.StageStyle.orignal, currentStage_);
+		stageLoader_.LoadStage(StageLoader.GameMode.orignal, currentStage_);
 		shopScript_.SetShopStage(currentStage_);
 		shopScript_.SetShopUIVisible(false);
 		pauseTime_ = 0.0f;

@@ -9,7 +9,7 @@ public class StageLoader : MonoBehaviour {
 	private WorldScript worldScript_;
 	string loadingFilePath_;
 	int parcingLineNum_;
-	public enum StageStyle
+	public enum GameMode
 	{
 		orignal,
 		hard,
@@ -38,18 +38,18 @@ public class StageLoader : MonoBehaviour {
 		
 	}
 	
-	public bool LoadStage(StageStyle stageStyle, int stageNum)
+	public bool LoadStage(GameMode stageStyle, int stageNum)
 	{
 		string stageFolder;
 		switch (stageStyle)
 		{
-			case StageStyle.orignal:
+			case GameMode.orignal:
 				stageFolder = "Assets/Resources/StageData/OriginalStages/";
 				break;
-			case StageStyle.hard:
+			case GameMode.hard:
 				stageFolder = "Assets/Resources/StageData/HardStages/";
 				break;
-			case StageStyle.custom:
+			case GameMode.custom:
 				stageFolder = "Assets/Resources/StageData/CustomStages/";
 				break;
 			default:
