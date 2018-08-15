@@ -33,6 +33,7 @@ public class GameManagerScript : MonoBehaviour {
 	public GameObject[] crackPool_;
 	public GameObject[] rockPool_;
 	public GameObject[] shopPool_;
+	public GameObject goalObject_;
 
 	private const int FISH_INSCREEN_MAX_NUM = 10;
 	private const int LARGE_HOLE_INSCREEN_MAX_NUM = 7;
@@ -57,8 +58,12 @@ public class GameManagerScript : MonoBehaviour {
 	bool bInShop_;
 	bool bPause_;
 	bool bDie_;
+	bool bShowingStageStartMap_;
+	private float mapShowingTime_;
 
 	public static int currentStage_;
+	public static int totalStage_;
+
 	public static void setCurrentStage(int stage)
 	{
 		currentStage_ = stage;
@@ -67,16 +72,39 @@ public class GameManagerScript : MonoBehaviour {
 	{
 		return currentStage_;
 	}
-	public int[] itemInventory_;	//0 : none, 1: buy, 2: buy and used
-	
-    private void Awake()
+	public static void setTotalStage(int stage)
+	{
+		totalStage_ = stage;
+	}
+	public static int getTotalStage()
+	{
+		return totalStage_;
+	}
+	//public int[] itemInventory_;    //0 : none, 1: buy, 2: buy and used
+	private ItemInventoryScript itemInven_;
+
+	public ItemInventoryScript ItemInven_
+	{
+		get
+		{
+			return itemInven_;
+		}
+
+		set
+		{
+			itemInven_ = value;
+		}
+	}
+
+	private void Awake()
     {
         playerScript_ = GameObject.Find("Player").GetComponent<PlayerScript>();
         worldScript_ = gameObject.GetComponent<WorldScript>();
 		stageLoader_ = gameObject.GetComponent<StageLoader>();
 		shopScript_ = GameObject.Find("ShopUI").GetComponent<ShopScript>();
-          
-        TimeText_ = GameObject.Find("UI").transform.Find("Time").GetComponent<Text>();
+		//ItemInven_ = gameObject.GetComponent<ItemInventoryScript>();
+
+		TimeText_ = GameObject.Find("UI").transform.Find("Time").GetComponent<Text>();
         FishText_ = GameObject.Find("UI").transform.Find("Fish").GetComponent<Text>();
         DistanceText_ = GameObject.Find("UI").transform.Find("Distance").GetComponent<Text>();
         SpeedText_ = GameObject.Find("UI").transform.Find("Speed").GetComponent<Text>();
@@ -88,22 +116,35 @@ public class GameManagerScript : MonoBehaviour {
 		crackPool_ = new GameObject[CRACK_INSCREEN_MAX_NUM];
 		rockPool_ = new GameObject[ROCK_INSCREEN_MAX_NUM];
 		shopPool_ = new GameObject[SHOP_INSCREEN_MAX_NUM];
-
+		
 		DebugText_ = GameObject.Find("UI").transform.Find("Debug").GetComponent<Text>();
 
-		itemInventory_ = new int[(int)Constant.ItemDef.TOTALITEMCOUNT];
-		for (int i = 0; i < (int)Constant.ItemDef.TOTALITEMCOUNT; ++i)
-		{
-			itemInventory_[i] = 0;
-		}
+		//itemInventory_ = new int[(int)Constant.ItemDef.TOTALITEMCOUNT];
+		//for (int i = 0; i < (int)Constant.ItemDef.TOTALITEMCOUNT; ++i)
+		//{//
+		//	itemInventory_[i] = 0;
+		//}
+
+		GameObject menu = GameObject.Find("UI").transform.Find("PauseMenu").gameObject;
+		menu.SetActive(false);
+		GameObject MapObj = GameObject.Find("UI").transform.Find("Map").gameObject;
+		//MapScript mapScript = MapObj.GetComponent<MapScript>();
+		//mapScript.LoadMapData(StageLoader.GameMode.orignal);
+		MapObj.SetActive(false);
+		mapShowingTime_ = 0.0f;
+		bShowingStageStartMap_ = false;
+		stageStartTime_ = 0.0f;
 	}
 
     // Use this for initialization
     void Start () {
-        stageStartTime_ = Time.time;
+		ShowMap(false);
+		//stageStartTime_ = Time.time;
         fishCount_ = 20;
 		//instantiate
-        for (int i = 0; i < FISH_INSCREEN_MAX_NUM; ++i)
+		goalObject_ = Instantiate(goal_, Vector3.zero, Quaternion.identity) as GameObject;
+		goalObject_.SetActive(false);
+		for (int i = 0; i < FISH_INSCREEN_MAX_NUM; ++i)
         {
             fishPool_[i] = Instantiate(fish_, Vector3.zero, Quaternion.identity) as GameObject;
             fishPool_[i].SetActive(false);
@@ -147,13 +188,14 @@ public class GameManagerScript : MonoBehaviour {
 			setCurrentStage(1);
 		/// 
 
-		stageLoader_.LoadStage(StageLoader.GameMode.orignal, currentStage_);
-		shopScript_.SetShopStage(currentStage_);
+		stageLoader_.LoadStage(StageLoader.GameMode.orignal, getCurrentStage());
+		shopScript_.SetShopStage(getCurrentStage());
 		shopScript_.SetShopUIVisible(false);
 		pauseTime_ = 0.0f;
 		bInShop_ = false;
 		bPause_ = false;
 		bDie_ = false;
+		refreshInventoryUI();
 	}
 	
 	// Update is called once per frame
@@ -166,6 +208,10 @@ public class GameManagerScript : MonoBehaviour {
 			UpdateUI();
 		if (isTimePauseState())
 			pauseTime_ += Time.deltaTime;
+		if (bShowingStageStartMap_ == true)
+		{
+			ProcShowingMap();
+		}
 	}
    
     void UpdateUI()
@@ -271,6 +317,10 @@ public class GameManagerScript : MonoBehaviour {
 					}
 				}
 				break;
+			case Constant.MapObjects.GOAL:
+				{
+					return goalObject_;
+				}
 			default:
 				// not yet ... return crack object
 				foreach (GameObject obj in crackPool_)
@@ -314,6 +364,8 @@ public class GameManagerScript : MonoBehaviour {
 		{
 			Time.timeScale = 0;
 			menu.SetActive(true);
+			ShowMap(true);
+			
 		}
 		else
 		{
@@ -327,11 +379,13 @@ public class GameManagerScript : MonoBehaviour {
 		GameObject menu = GameObject.Find("UI").transform.Find("PauseMenu").gameObject;
 		Time.timeScale = 1.0f;
 		menu.SetActive(false);
+		HideMap();
 	}
 
 	public void OnRestratButton()
 	{
-		Time.timeScale = 1.0f;
+		//Time.timeScale = 1.0f;
+		HideMap();
 		SceneManager.LoadScene("PA_MainGame");
 	}
 	public void OnExitButton()
@@ -346,10 +400,14 @@ public class GameManagerScript : MonoBehaviour {
 	public bool BuyItem(Constant.ItemDef item, int price)
 	{
 		if (fishCount_ >= price
-			&& itemInventory_[(int)item] == 0)
+			//&& itemInventory_[(int)item] == 0)
+			//&& ItemInven_.GetItemState(item) == Constant.ItemState.None)
+			&& ItemInventoryScript.instance.GetItemState(item) == Constant.ItemState.None)
 		{
 			fishCount_ -= price;
-			itemInventory_[(int)item] = 1;
+			//itemInventory_[(int)item] = 1;
+			//ItemInven_.SetItemState(item, Constant.ItemState.Have);
+			ItemInventoryScript.instance.SetItemState(item, Constant.ItemState.Have);
 			string inventoryName = "Inventory_" + ((int)item).ToString();
 			GameObject itemIcon = GameObject.Find("UI").transform.Find(inventoryName).gameObject;
 			itemIcon.SetActive(true);
@@ -360,14 +418,18 @@ public class GameManagerScript : MonoBehaviour {
 
 	public bool isBoughtItem(Constant.ItemDef item)
 	{
-		if (itemInventory_[(int)item] != 0)
+		//if (itemInventory_[(int)item] != 0)
+		//if (ItemInven_.GetItemState(item) != Constant.ItemState.None)
+		if (ItemInventoryScript.instance.GetItemState(item) != Constant.ItemState.None)
 			return true;
 		return false;
 	}
 
 	public bool hasItem(Constant.ItemDef item)
 	{
-		if (itemInventory_[(int)item] == 1)
+		//if (itemInventory_[(int)item] == 1)
+		//if (ItemInven_.GetItemState(item) == Constant.ItemState.Have)
+		if (ItemInventoryScript.instance.GetItemState(item) == Constant.ItemState.Have)
 			return true;
 		return false;
 	}
@@ -380,6 +442,10 @@ public class GameManagerScript : MonoBehaviour {
 			return true;
 		if (bDie_)
 			return true;
+		if (bPause_)
+			return true;
+		if (bShowingStageStartMap_)
+			return true;
 		return false;
 	}
 	public void onDie(int dieReason)
@@ -390,7 +456,7 @@ public class GameManagerScript : MonoBehaviour {
 	{
 		setCurrentStage(level);
 		SceneManager.LoadScene("PA_MainGame");
-		Time.timeScale = 1.0f;
+		//Time.timeScale = 1.0f;
 	}
 	public void goNextStage()
 	{
@@ -403,6 +469,58 @@ public class GameManagerScript : MonoBehaviour {
 			loadStage(getCurrentStage() + 1);
 			
 		}
+		
+	}
+	public void ShowMap(bool bFrompause)
+	{
+		GameObject MapObj = GameObject.Find("UI").transform.Find("Map").gameObject;
+		//MapScript mapScript = MapObj.GetComponent<MapScript>();
+		//mapScript.LoadMapData(StageLoader.GameMode.orignal);
+		MapObj.SetActive(true);
+		MapObj.transform.Find("MapBackground").gameObject.SetActive(!bFrompause);
+		if (bFrompause == false)
+		{
+			mapShowingTime_ = Time.unscaledTime;
+			bShowingStageStartMap_ = true;
+		}
+	}
+	public void HideMap()
+	{
+		GameObject MapObj = GameObject.Find("UI").transform.Find("Map").gameObject;
+		//MapScript mapScript = MapObj.GetComponent<MapScript>();
+		//mapScript.LoadMapData(StageLoader.GameMode.orignal);
+		MapObj.SetActive(false);
+	}
+	public void ProcShowingMap()
+	{
+		if (Time.unscaledTime - mapShowingTime_ > 6.0f)
+		{
+			mapShowingTime_ = 0.0f;
+			bShowingStageStartMap_ = false;
+			HideMap();
+			stageStartTime_ = Time.time;
+			Time.timeScale = 1.0f;
+		}
+	}
+
+	public void refreshInventoryUI()
+	{
+		for (int i = 0; i < (int)Constant.ItemDef.TOTALITEMCOUNT; ++i)
+		{
+			string inventoryName = "Inventory_" + i.ToString();
+			GameObject itemIcon = GameObject.Find("UI").transform.Find(inventoryName).gameObject;
+			if (hasItem((Constant.ItemDef)i))
+			{
+				
+				itemIcon.SetActive(true);
+			}
+			else
+			{
+				itemIcon.SetActive(false);
+			}
+			
+		}
+		
 		
 	}
 }

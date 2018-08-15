@@ -14,14 +14,33 @@ public partial class Constant
 }
 
 public class ItemInventoryScript : MonoBehaviour {
-	public static Constant.ItemState[] itemInventory_; //0 : none, 1: buy, 2: buy and used
-	public static void SetItemState(Constant.ItemDef itemName, Constant.ItemState state)
+	public static ItemInventoryScript instance = null;
+	public Constant.ItemState[] itemInventory_; //0 : none, 1: buy, 2: buy and used
+	public void SetItemState(Constant.ItemDef itemName, Constant.ItemState state)
 	{
 		itemInventory_[(int)itemName] = state;
 	}
-	public static Constant.ItemState GetItemState(Constant.ItemDef itemName)
+	public Constant.ItemState GetItemState(Constant.ItemDef itemName)
 	{
 		return itemInventory_[(int)itemName];
+	}
+	private void Awake()
+	{
+		if (instance == null)
+		{
+			instance = this;
+			
+		}
+		else if (instance != this)
+		{
+			Destroy(gameObject);
+		}
+		DontDestroyOnLoad(gameObject);
+		itemInventory_ = new Constant.ItemState[(int)Constant.ItemDef.TOTALITEMCOUNT];
+		for (int i = 0; i < (int)Constant.ItemDef.TOTALITEMCOUNT; ++i)
+		{
+			itemInventory_[i] = Constant.ItemState.None;
+		}
 	}
 	// Use this for initialization
 	void Start () {
@@ -33,7 +52,7 @@ public class ItemInventoryScript : MonoBehaviour {
 		
 	}
 
-	public static void ResetAllInventory()
+	public void ResetAllInventory()
 	{
 		for (int i = 0; i < (int)Constant.ItemDef.TOTALITEMCOUNT; ++i)
 		{

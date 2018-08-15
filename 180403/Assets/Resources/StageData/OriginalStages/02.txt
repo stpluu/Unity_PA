@@ -1,19 +1,19 @@
 <stage>
-tile=spring_forest
+tile=cave
 time=200
-distance=600
+distance=700
 </stage>
 // 스테이지 정보
 // 나타나는 위치(캐릭터에 닿는 위치 기준, 실제로는 일정거리 먼저 등장), 오브젝트 종류, x축 위치
 <objects>
-45,fish_hole,-1
-51,fish_hole,1
-57,fish_hole,-1
-63,fish_hole,1
-69,fish_hole,-1
-75,fish_hole,1
+45,crack,-1
+51,crack,1
+57,crack,-1
+63,crack,1
+69,crack,-1
+75,crack,1
 //91,heart,0
-93,fish_hole,-1
+93,crack,-1
 99,fish_hole,1
 105,fish_hole,-1
 111,fish_hole,1
@@ -44,7 +44,7 @@ distance=600
 327,large_hole,-1
 339,fish_hole,1
 353,large_hole,-1
-363,warp_hole,0
+//363,warp_hole,0
 375,large_hole,-1
 387,fish_hole,1
 399,large_hole,-1
@@ -68,7 +68,7 @@ distance=600
 537,crack,-1
 543,crack,1
 565,crack,-1
-600,goal,0
+700,goal,0
 </objects>
 <monsters>
 </monsters>
