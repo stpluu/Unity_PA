@@ -10,7 +10,8 @@ public partial class Constant
 		Have = 1,
 		Used = 2,
 	};
-	
+
+	public const int InventoryMaxSize = 7;
 }
 
 public class ItemInventoryScript : MonoBehaviour {

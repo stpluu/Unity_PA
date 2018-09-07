@@ -113,6 +113,7 @@ public class ShopScript : MonoBehaviour {
 			}
 				
 		}
+		shopUI_.transform.Find("SlotMachineUI").gameObject.SetActive(false);
 	}
 
 	//아이템 버튼 클릭시 처리 : 첫번째 클릭-선택, 두번째 클릭 - 구매
@@ -191,4 +192,17 @@ public class ShopScript : MonoBehaviour {
 		SetShopUIVisible(false);
 		gameManagerScript_.OnExitShop();
 	}
+
+	public void OnClickSlotMachine()
+	{
+		if (gameManagerScript_.GetFishCount() > 0)
+		{
+			// open slow machine UI
+			shopUI_.transform.Find("SlotMachineUI").gameObject.SetActive(true);
+		}
+		else
+		{
+		}
+	}
+
 }

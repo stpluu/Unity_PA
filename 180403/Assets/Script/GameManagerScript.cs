@@ -404,7 +404,8 @@ public class GameManagerScript : MonoBehaviour {
 			//&& ItemInven_.GetItemState(item) == Constant.ItemState.None)
 			&& ItemInventoryScript.instance.GetItemState(item) == Constant.ItemState.None)
 		{
-			fishCount_ -= price;
+			//fishCount_ -= price;
+			ReduceFish(price);
 			//itemInventory_[(int)item] = 1;
 			//ItemInven_.SetItemState(item, Constant.ItemState.Have);
 			ItemInventoryScript.instance.SetItemState(item, Constant.ItemState.Have);
@@ -505,7 +506,7 @@ public class GameManagerScript : MonoBehaviour {
 
 	public void refreshInventoryUI()
 	{
-		for (int i = 0; i < (int)Constant.ItemDef.TOTALITEMCOUNT; ++i)
+		for (int i = 0; i < (int)Constant.InventoryMaxSize; ++i)
 		{
 			string inventoryName = "Inventory_" + i.ToString();
 			GameObject itemIcon = GameObject.Find("UI").transform.Find(inventoryName).gameObject;
@@ -522,5 +523,21 @@ public class GameManagerScript : MonoBehaviour {
 		}
 		
 		
+	}
+
+	public int GetFishCount()
+	{
+		return fishCount_;
+	}
+	public bool ReduceFish(int count)
+	{
+		if (count > fishCount_)
+			return false;
+		fishCount_ = fishCount_ - count;
+		return true;
+	}
+	public void AddFish(int count)
+	{
+		fishCount_ += count;
 	}
 }

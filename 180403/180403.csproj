@@ -97,6 +97,7 @@
     <Compile Include="Assets\Script\PlayerScript.cs" />
     <Compile Include="Assets\Script\RockScript.cs" />
     <Compile Include="Assets\Script\ShopScript.cs" />
+    <Compile Include="Assets\Script\SlotMachineScript.cs" />
     <Compile Include="Assets\Script\StageLoader.cs" />
     <Compile Include="Assets\Script\WorldScript.cs" />
     <Compile Include="Assets\ShopHoleScript.cs" />
