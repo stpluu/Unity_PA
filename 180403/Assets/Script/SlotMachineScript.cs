@@ -38,13 +38,17 @@ public partial class Constant
 
 	};
 	public const float resultHoldTime = 2.0f;
+	public const float resultForceHoldTime = 1.5f;
+	public const int maximumFish = 999;
 }
 public class SlotMachineScript : MonoBehaviour {
 	public Slider fishSlider_;
 	public Text fishCountText_;
+	public Text fishResultCountText_;
 	public Image[] slot_;
 	
 	private GameManagerScript gameManagerScript_;
+
 	private Sprite[] slotSprite_; 
 
 	private Constant.SlotMachineImage[] currentSlotImageIndex_;
@@ -53,6 +57,7 @@ public class SlotMachineScript : MonoBehaviour {
 	private float[] updateTime_;
 	private float endTime_;
 	private int betFish_;
+	private int resultFish_;
 	// Use this for initialization
 	void Start () {
 		
@@ -72,7 +77,12 @@ public class SlotMachineScript : MonoBehaviour {
 					updateTime_[i] = Time.time;
 				}
 			}
+			if (Time.time - endTime_ > Constant.resultHoldTime)
+			{
+				SetSlotMachineState(Constant.SlotMachineState.end);
+			}
 		}
+		UpdateUI();
 	}
 	
 	private void Awake()
@@ -93,6 +103,8 @@ public class SlotMachineScript : MonoBehaviour {
 
 			slotSprite_[i] = Resources.Load(spriteName, typeof(Sprite)) as Sprite;
 		}
+		fishResultCountText_.enabled = false;
+		resultFish_ = 0;
 	}
 
 	private void OnEnable()
@@ -139,7 +151,7 @@ public class SlotMachineScript : MonoBehaviour {
 				break;
 			case Constant.SlotMachineState.result:
 				{
-					if (Time.time - endTime_ > Constant.resultHoldTime)
+					if (Time.time - endTime_ > Constant.resultForceHoldTime)
 					{
 						SetSlotMachineState(Constant.SlotMachineState.end);
 					}
@@ -160,7 +172,21 @@ public class SlotMachineScript : MonoBehaviour {
 
 	private void UpdateUI()
 	{
-
+		switch (currentSlotMachineState_)
+		{
+			case Constant.SlotMachineState.result:
+				{
+					// TODO : FadeOut4
+					float alpha = (Constant.resultHoldTime - (Time.time - endTime_)) / Constant.resultHoldTime;
+					fishResultCountText_.color = new Color(fishResultCountText_.color.r
+															, fishResultCountText_.color.g
+															, fishResultCountText_.color.b
+															, alpha);
+				}
+				break;
+			default:
+				break;
+		}
 	}
 
 	private bool IsSlotMachineRunning()
@@ -232,13 +258,17 @@ public class SlotMachineScript : MonoBehaviour {
 			case Constant.SlotMachineState.result:
 				{
 					endTime_ = Time.time;
+
+					resultFish_ = CalculateResult();
+					fishResultCountText_.text = string.Format("{0:D3}", resultFish_);
+					fishResultCountText_.enabled = true;
 				}
 				break;
 			case Constant.SlotMachineState.end:
 				{
-					CalculateResult();
+					ApplyResultFishCount();
 					//StopCoroutine("SlotMachineRoutine");
-
+					fishResultCountText_.enabled = false;
 				}
 				break;
 			default:
@@ -292,7 +322,7 @@ public class SlotMachineScript : MonoBehaviour {
 		}
 	}
 	
-	private void CalculateResult()
+	private int CalculateResult()
 	{
 		int fishRate = 0;
 		int cherryCount = 0;
@@ -317,7 +347,7 @@ public class SlotMachineScript : MonoBehaviour {
 					fishRate = 20;
 					break;
 				case Constant.SlotMachineImage.Bad:
-					fishRate = -1;
+					fishRate = 0;
 					break;
 				default:
 					break;
@@ -337,10 +367,22 @@ public class SlotMachineScript : MonoBehaviour {
 			else if (cherryCount == 2)
 			{ fishRate = 2; }
 		}
-		betFish_ *= fishRate;
-		if (betFish_ > 0)
+		//betFish_ *= fishRate;
+		//if (betFish_ > 0)
+		//{
+		//	gameManagerScript_.AddFish(betFish_);
+		//}
+		if (betFish_ * fishRate > Constant.maximumFish)
 		{
-			gameManagerScript_.AddFish(betFish_);
+			return Constant.maximumFish;
+		}
+		return betFish_ * fishRate;
+	}
+	private void ApplyResultFishCount()
+	{
+		if (resultFish_ > 0)
+		{
+			gameManagerScript_.AddFish(resultFish_);
 		}
 	}
 }

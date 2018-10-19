@@ -13,6 +13,7 @@ public class GameManagerScript : MonoBehaviour {
 	private ShopScript shopScript_;
 
 	public GameObject fish_;
+	public GameObject bullet_;
 	public GameObject heart_;
 	public GameObject large_hole_;
 	public GameObject fish_hole_;
@@ -23,9 +24,14 @@ public class GameManagerScript : MonoBehaviour {
 	public GameObject warp_;
 	public GameObject wing_;
 	public GameObject goal_;
+	public GameObject monsterBall_;
+	public GameObject monsterBat_;
+	public GameObject monsterCloud_;
+	public GameObject monsterSquid_;
 
 	// Item / monster / bullet pool
     public GameObject[] fishPool_;
+	public GameObject[] bulletPool_;
 
 	// MapObject Pool
 	public GameObject[] largeHolePool_;
@@ -33,6 +39,7 @@ public class GameManagerScript : MonoBehaviour {
 	public GameObject[] crackPool_;
 	public GameObject[] rockPool_;
 	public GameObject[] shopPool_;
+	public GameObject[] monsterBallPool_;
 	public GameObject goalObject_;
 
 	private const int FISH_INSCREEN_MAX_NUM = 10;
@@ -41,7 +48,9 @@ public class GameManagerScript : MonoBehaviour {
 	private const int FISH_HOLE_INSCREEN_MAX_NUM = 7;
 	private const int ROCK_INSCREEN_MAX_NUM = 7;
 	private const int SHOP_INSCREEN_MAX_NUM = 3;
+	private const int MONSTER_INSCREEN_MAX_NUM = 5;
 
+	private const int BULLET_INSCREEN_MAX_NUM = 3;
 
 	[SerializeField] private int fishCount_;	//player 가 소지한 fish 수
 
@@ -111,12 +120,16 @@ public class GameManagerScript : MonoBehaviour {
 
         // create object instanace
         fishPool_ = new GameObject[FISH_INSCREEN_MAX_NUM];
+		bulletPool_ = new GameObject[BULLET_INSCREEN_MAX_NUM];
+
 		largeHolePool_ = new GameObject[LARGE_HOLE_INSCREEN_MAX_NUM];
 		fishHolePool_ = new GameObject[FISH_HOLE_INSCREEN_MAX_NUM];
 		crackPool_ = new GameObject[CRACK_INSCREEN_MAX_NUM];
 		rockPool_ = new GameObject[ROCK_INSCREEN_MAX_NUM];
 		shopPool_ = new GameObject[SHOP_INSCREEN_MAX_NUM];
-		
+
+		monsterBallPool_ = new GameObject[MONSTER_INSCREEN_MAX_NUM];
+
 		DebugText_ = GameObject.Find("UI").transform.Find("Debug").GetComponent<Text>();
 
 		//itemInventory_ = new int[(int)Constant.ItemDef.TOTALITEMCOUNT];
@@ -136,19 +149,24 @@ public class GameManagerScript : MonoBehaviour {
 		stageStartTime_ = 0.0f;
 	}
 
-    // Use this for initialization
-    void Start () {
+	// Use this for initialization
+	void Start() {
 		ShowMap(false);
 		//stageStartTime_ = Time.time;
-        fishCount_ = 20;
+		fishCount_ = 20;
 		//instantiate
 		goalObject_ = Instantiate(goal_, Vector3.zero, Quaternion.identity) as GameObject;
 		goalObject_.SetActive(false);
 		for (int i = 0; i < FISH_INSCREEN_MAX_NUM; ++i)
-        {
-            fishPool_[i] = Instantiate(fish_, Vector3.zero, Quaternion.identity) as GameObject;
-            fishPool_[i].SetActive(false);
-        }
+		{
+			fishPool_[i] = Instantiate(fish_, Vector3.zero, Quaternion.identity) as GameObject;
+			fishPool_[i].SetActive(false);
+		}
+		for (int i = 0; i < BULLET_INSCREEN_MAX_NUM; ++i)
+		{
+			bulletPool_[i] = Instantiate(fish_, Vector3.zero, Quaternion.identity) as GameObject;
+			bulletPool_[i].SetActive(false);
+		}
 
 		for (int i = 0; i < LARGE_HOLE_INSCREEN_MAX_NUM; ++i)
 		{
@@ -169,7 +187,7 @@ public class GameManagerScript : MonoBehaviour {
 		}
 
 		for (int i = 0; i < ROCK_INSCREEN_MAX_NUM; ++i)
-		{	
+		{
 			rockPool_[i] = Instantiate(rock_, Vector3.zero, Quaternion.identity) as GameObject;
 			rockPool_[i].SetActive(false);
 		}
@@ -180,6 +198,13 @@ public class GameManagerScript : MonoBehaviour {
 			shopPool_[i].SetActive(false);
 		}
 
+		//////////////////////////////////////////////////////////////////////////////////////////////////////
+		// Monster
+		for (int i = 0; i < MONSTER_INSCREEN_MAX_NUM; ++i)
+		{
+			monsterBallPool_[i] = Instantiate(monsterBall_, Vector3.zero, Quaternion.identity) as GameObject;
+			monsterBallPool_[i].SetActive(false);
+		}
 		bInGoal_ = false;
 
 		/// for debug
@@ -228,7 +253,7 @@ public class GameManagerScript : MonoBehaviour {
         SpeedText_.text = playerScript_.speed_.ToString();
 
         //time text
-        int remainTime = worldScript_.stageMaxTime_ * 10 - (int)((Time.time - stageStartTime_) * 10) + (int)pauseTime_;
+        int remainTime = worldScript_.stageMaxTime_ * 10 - (int)((Time.time - stageStartTime_ + pauseTime_) * 10.0f);
         TimeText_.text = remainTime.ToString();
 
         //distanceText
@@ -335,6 +360,28 @@ public class GameManagerScript : MonoBehaviour {
         return null;
     }
 
+	public GameObject GetMonsterObjectInstance(Constant.MapMonsters monsterType)
+	{
+		switch (monsterType)
+		{
+			case Constant.MapMonsters.BALL:
+				foreach (GameObject obj in monsterBallPool_)
+						{
+					if (obj.activeSelf == false)
+					{
+						return obj;
+					}
+				}
+				break;
+			case Constant.MapMonsters.BAT:
+				break;
+			case Constant.MapMonsters.BOSS:
+				break;
+			default:
+				break;
+		}
+		return null;
+	}
 	public GameObject GetFishInstance()
 	{
 		foreach (GameObject obj in fishPool_)
@@ -347,13 +394,24 @@ public class GameManagerScript : MonoBehaviour {
 		}
 		return null;
 	}
-
+	public GameObject GetBulletInstance()
+	{
+		foreach (GameObject obj in bulletPool_)
+		{
+			if (obj.activeSelf == false)
+			{
+				return obj;
+			}
+		}
+		return null;
+	}
 	public void OnGoal()
 	{
 		stageFinishTime_ = Time.time;
 		//GameObject.FindWithTag("Player").GetComponent<Animator>().SetTrigger("trGoal");
 		playerScript_.OnGoal();
 		//playerScript_.SetSpeed(0);
+		Debug.Log("FinishTime : " + stageFinishTime_.ToString());
 		bInGoal_ = true;
 	}
 
@@ -539,5 +597,7 @@ public class GameManagerScript : MonoBehaviour {
 	public void AddFish(int count)
 	{
 		fishCount_ += count;
+		if (fishCount_ > Constant.maximumFish)
+			fishCount_ = Constant.maximumFish;
 	}
 }

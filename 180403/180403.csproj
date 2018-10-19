@@ -90,9 +90,12 @@
     <Compile Include="Assets\Script\GameManagerScript.cs" />
     <Compile Include="Assets\Script\GoalScript.cs" />
     <Compile Include="Assets\Script\ItemInventoryScript.cs" />
+    <Compile Include="Assets\Script\Items\BulletScript.cs" />
     <Compile Include="Assets\Script\LargeHoleScript.cs" />
     <Compile Include="Assets\Script\MapScript.cs" />
     <Compile Include="Assets\Script\MenuControl.cs" />
+    <Compile Include="Assets\Script\Monsters\MonsterBallScript.cs" />
+    <Compile Include="Assets\Script\Monsters\MonsterScript.cs" />
     <Compile Include="Assets\Script\PlayerControl.cs" />
     <Compile Include="Assets\Script\PlayerScript.cs" />
     <Compile Include="Assets\Script\RockScript.cs" />

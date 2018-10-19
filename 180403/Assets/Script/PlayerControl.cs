@@ -27,7 +27,7 @@ public class PlayerControl : MonoBehaviour {
         {
             GetComponent<PlayerScript>().onMoveKeyUp(false);
         }
-
+		
         ////////////////////////////////////////////////////////////////////
         // speed control
         if (Input.GetKeyDown(KeyCode.UpArrow))
@@ -54,7 +54,21 @@ public class PlayerControl : MonoBehaviour {
         {
             GetComponent<PlayerScript>().onJumpKeyDown();
         }
-        
+		if (Input.GetKeyDown(KeyCode.V)
+			|| Input.GetKeyDown(KeyCode.M))
+		{
+			GetComponent<PlayerScript>().onShotKey();
+		}
+
+		//GM
+		if (Input.GetKeyDown(KeyCode.LeftBracket))
+		{
+			GetComponent<PlayerScript>().OnLeftBlockKey();
+		}
+		if (Input.GetKeyDown(KeyCode.RightBracket))
+		{
+			GetComponent<PlayerScript>().OnRightBlockKey();
+		}
 	}
     public bool GetKeyState(KeyCode keyCode)
     {

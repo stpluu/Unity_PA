@@ -33,6 +33,14 @@ static partial class Constant
 		SPECIAL_3,
 		WING,
 	};
+	public enum MapMonsters
+	{
+		BALL,
+		BAT,
+		CLOUD,
+		SQUID,
+		BOSS,
+	};
 }
 public class WorldScript : MonoBehaviour {
     
@@ -74,7 +82,24 @@ public class WorldScript : MonoBehaviour {
 		}
     };
 
-    private List<MapObjectStruct> objectList_;	//맵 오브젝트 리스트
+	[System.Serializable]
+	struct MapMonsterStruct
+	{
+		public Constant.MapMonsters monsterType_;
+		public int distance_;   //몬스터 등장 위치
+		public int horizonalPosition_; //등장 위치 (좌/중앙/우) -1, 0, 1
+		public GameObject object_;
+		public bool bReady_;
+		public bool bPassed_;
+		public void SetReady(bool bReady)
+		{
+			bReady_ = bReady;
+		}
+
+	};
+    private List<MapObjectStruct> objectList_;  //맵 오브젝트 리스트
+
+	private List<MapMonsterStruct> monsterList_;
 
 	private int speedKeyInputTime_;     //스피드 업/다운 키를 누른 시간
 
@@ -251,8 +276,38 @@ public class WorldScript : MonoBehaviour {
 		
 		return true;
 	}
+	public bool addMonster(int distance, string monsterType, int hPos)
+	{
+		if (stageMaxDistance_ <= 0
+			|| distance > stageMaxDistance_)
+			return false;
 
-    void CreateObjects()
+		// 오브젝트 생성(실제생성은 나중에)
+		MapMonsterStruct obj = new MapMonsterStruct();
+
+		///////////////////////////////////////////////////////////////
+		if (monsterType.Equals("boss"))
+		{
+			obj.monsterType_ = Constant.MapMonsters.BOSS;
+		}
+		else if (monsterType.Equals("ball"))
+		{
+			obj.monsterType_ = Constant.MapMonsters.BALL;
+		}
+		
+		else
+		{
+			return false;
+		}
+		obj.distance_ = distance;
+		obj.horizonalPosition_ = hPos;
+		obj.bReady_ = false;
+		obj.bPassed_ = false;
+		monsterList_.Add(obj);
+
+		return true;
+	}
+	void CreateObjects()
     {
       
     }
@@ -264,12 +319,13 @@ public class WorldScript : MonoBehaviour {
         bgSprites_ = new Sprite[Constant.Number_BackGroundImg];
 		bGoal_ = false;
 		objectList_ = new List<MapObjectStruct>();
-
+		monsterList_ = new List<MapMonsterStruct>();
 	}
     void Start () {
 
 		//loadStage(1);
 		objectList_.Clear();
+		monsterList_.Clear();
 	}
 	
 	// Update is called once per frame
@@ -338,10 +394,66 @@ public class WorldScript : MonoBehaviour {
         backGround_.GetComponent<SpriteRenderer>().sprite = bgSprites_[currentBgNum_];
     }
 
+	private void UpdateMonsterPosition(float frameMoveDistance)
+	{
+		int iDistance = (int)distance_;
+		Vector3 curPostionVector = new Vector3();
+
+		for (int i = 0; i < monsterList_.Count; ++i)
+		{
+
+			MapMonsterStruct mapMon = monsterList_[i];
+			//너무 멀리 있는 오브젝트 패스
+			if (iDistance < mapMon.distance_ - Constant.Distance_ObjectAppear_)
+				break;
+
+			if (mapMon.bPassed_ == true)
+				continue;
+			
+
+			// 여기서부턴 거리에 들어와있는 오브젝트들
+			if (mapMon.object_ == null)
+			{
+				mapMon.object_
+					= GameObject.FindGameObjectWithTag(
+						"GameController").GetComponent<GameManagerScript>().GetMonsterObjectInstance(mapMon.monsterType_);
+				if (mapMon.object_ == null)
+				{
+					Debug.LogError("map object get error - dist : " + mapMon.distance_.ToString()
+						+ " type : " + mapMon.monsterType_.ToString());
+					continue;
+				}
+				
+				mapMon.object_.SetActive(true);
+			}
+			
+			curPostionVector.x = calcMonsterXPos(mapMon.monsterType_, mapMon.horizonalPosition_, mapMon.distance_);
+			curPostionVector.y = mapMon.object_.GetComponent<MonsterScript>().CalcYPos();
+			curPostionVector.z = mapMon.object_.GetComponent<MonsterScript>().CalcZPos() ;
+			mapMon.object_.transform.position = curPostionVector;
+			Debug.Log("Monster ZPos :" + curPostionVector.z.ToString());
+			if (curPostionVector.z < -3.0f)
+			{
+				if (mapMon.object_ != null)
+				{
+					mapMon.object_.SetActive(false);
+					Debug.Log("object deactived : " + mapMon.distance_.ToString() + " type : " + mapMon.monsterType_.ToString());
+					mapMon.object_ = null;
+					mapMon.bPassed_ = true;
+					monsterList_[i] = mapMon;
+				}
+				continue;
+			}
+			monsterList_[i] = mapMon;
+		}
+
+	}
 	// 현재 거리 갱신
-    public void updateDistance(int speed)
+	public void updateDistance(int speed)
     {
         float FrameDistance = Time.deltaTime * ((float)speed * Constant.Speed_WorldScrool);
+		if (speed == 0)
+			FrameDistance = 0.0f;
         float prevDistance = distance_;
         distance_ += FrameDistance;
 		// 1.0단위로 bg / object 위치를 업데이트 한다(끊어지는 듯한 연출)
@@ -350,7 +462,7 @@ public class WorldScript : MonoBehaviour {
             updateObjectPosition();
             updateBG();
         }
-
+		UpdateMonsterPosition(FrameDistance);//몬스터는 매프레임 위치 갱신
 		// 최종 거리 도달할경우 골인 처리 시작
 		if (bGoal_ == false
 			&& distance_ >= stageMaxDistance_ )
@@ -447,5 +559,43 @@ public class WorldScript : MonoBehaviour {
         return 0.0f;
     }
 
-   
+	float calcMonsterXPos(Constant.MapMonsters objType, int hPos, int dist)
+	{
+		switch (objType)
+		{
+			case Constant.MapMonsters.BALL:
+				return (float)hPos * 1.0f;
+			default:
+				break;
+		}
+		return 0.0f;
+	}
+	float calcMonsterZPos(Constant.MapMonsters objType, int dist)
+	{
+
+		float distFromCurPos = (float)dist - distance_;
+		switch (objType)
+		{
+			case Constant.MapMonsters.BALL:
+				return distFromCurPos * 4.0f;
+			default:
+				break;
+		}
+		return 0.0f;
+	}
+
+	// 
+	float calcMonsterYPos(Constant.MapMonsters objType, int dist)
+	{
+		//float distFromCurPos = (float)dist - distance_;
+		//switch (objType)
+		//{
+		//	case Constant.MapMonsters.BALL:
+		//		return distFromCurPos * 0.3f;
+		//	default:
+		//		break;
+		//}
+		return 0.0f;
+	}
+
 }

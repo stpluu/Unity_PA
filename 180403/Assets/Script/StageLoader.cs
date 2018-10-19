@@ -174,8 +174,20 @@ public class StageLoader : MonoBehaviour {
 		worldScript_.addObject(distance, oneData[1], hPos);
 		return true;
 	}
-	private static bool ProcessMonsterLine(string data)
+	private bool ProcessMonsterLine(string data)
 	{
+		string[] oneData = data.Split(new char[] { ',' });
+		int distance = 0;
+		int hPos = 0;
+		if (int.TryParse(oneData[0], out distance) == false)
+		{
+			ParseError("monster_distance error", "> 0 && <= stage distance");
+		}
+		if (int.TryParse(oneData[2], out hPos) == false)
+		{
+			ParseError("monster_horizonal postion error", "must be integer");
+		}
+		worldScript_.addMonster(distance, oneData[1], hPos);
 		return true;
 	}
 	private bool ProcessStageLine(string data)

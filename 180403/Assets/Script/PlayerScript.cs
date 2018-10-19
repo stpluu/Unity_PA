@@ -34,6 +34,8 @@ static partial class Constant
 	public static readonly float[] Time_stopJump = { 0.5f, 0.3f, 0.3f };
 	public static readonly float[] Position_stopJumpHeight = { 0.5f, 0.2f, 0.2f };
 
+	public const int Max_BulletCount = 3;
+
 };
 
 public class PlayerScript : MonoBehaviour {
@@ -381,6 +383,7 @@ public class PlayerScript : MonoBehaviour {
 		}
     }
 
+	
     public void onMoveKey(bool isLeft)
     {
 		//Debug.Log("Key - Move");
@@ -471,8 +474,18 @@ public class PlayerScript : MonoBehaviour {
 
     }
 
-    /// coroutine
-    IEnumerator UpdateCharacterPosition()
+	//GM
+	public void OnRightBlockKey()
+	{
+		speed_ = Constant.Speed_Max_Lv2;
+	}
+	public void OnLeftBlockKey()
+	{
+		speed_ = Constant.Speed_Min;
+	}
+
+	/// coroutine
+	IEnumerator UpdateCharacterPosition()
     {
 		GameObject shadow = GameObject.Find("Player").transform.Find("PlayerShadow").gameObject;
         while(true)

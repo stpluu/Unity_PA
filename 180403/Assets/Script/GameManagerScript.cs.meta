@@ -1,11 +1,12 @@
 fileFormatVersion: 2
 guid: b0d7ea1657a6ff34181066e447145e42
-timeCreated: 1523375665
+timeCreated: 1539937758
 licenseType: Free
 MonoImporter:
   serializedVersion: 2
   defaultReferences:
   - fish_: {fileID: 1721530876860356, guid: ffdfe33db2089c84faef5eb0a09375ed, type: 2}
+  - bullet_: {fileID: 1862636640412888, guid: 2e1d84fdd2f483a459809d4eea1b90a5, type: 2}
   - heart_: {fileID: 1721530876860356, guid: ffdfe33db2089c84faef5eb0a09375ed, type: 2}
   - large_hole_: {fileID: 1206772065564064, guid: fd4e582cb6ddc734e87336a794a58fee,
       type: 2}
@@ -18,6 +19,12 @@ MonoImporter:
   - warp_: {fileID: 1477546112205956, guid: 340356efcffdc7a4381960fae95dba47, type: 2}
   - wing_: {fileID: 1721530876860356, guid: ffdfe33db2089c84faef5eb0a09375ed, type: 2}
   - goal_: {fileID: 1775085236164018, guid: 4611229b49e393848a4a4903c47f4d91, type: 2}
+  - monsterBall_: {fileID: 1874374028131144, guid: 923cee20c81a0db4ab6b6254ebb55570,
+      type: 2}
+  - monsterBat_: {instanceID: 0}
+  - monsterCloud_: {instanceID: 0}
+  - monsterSquid_: {instanceID: 0}
+  - goalObject_: {instanceID: 0}
   executionOrder: 0
   icon: {instanceID: 0}
   userData: 
