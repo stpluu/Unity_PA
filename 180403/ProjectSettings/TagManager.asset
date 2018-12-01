@@ -8,6 +8,8 @@ TagManager:
   - Hole
   - Shop
   - Crack
+  - Monster
+  - Bullet
   layers:
   - Default
   - TransparentFX

@@ -17,6 +17,7 @@ static partial class Constant
         public const int Position_objectAppearDist = 10;
     public const float Position_VerticalMoveLimit_Left = -6.0f;
     public const float Position_VerticalMoveLimit_Right = 6.0f;
+	public const float Position_Bullet_Start_Y = 1.5f;
 
     public const int Direction_Left = -1;
         public const int Direction_Neutral = 0;
@@ -35,6 +36,7 @@ static partial class Constant
 	public static readonly float[] Position_stopJumpHeight = { 0.5f, 0.2f, 0.2f };
 
 	public const int Max_BulletCount = 3;
+	public const float Time_BulletCoolTime = 0.5f;
 
 };
 
@@ -89,6 +91,7 @@ public class PlayerScript : MonoBehaviour {
     public float inHoleTime_;
     public float stateStartTime_;
     public int stopJumpCount_;  //구멍에 걸렸을때 자동으로 점프한 횟수.
+	public float bulletShotTime_;
 
 	private GameObject LastCollideObject_;
 	private Constant.MapObjects enterShopType_;
@@ -103,6 +106,7 @@ public class PlayerScript : MonoBehaviour {
         animator_ = gameObject.GetComponent<Animator>();
 		LastCollideObject_ = null;
 		gameManagerScript_ = GameObject.Find("GameManager").GetComponent<GameManagerScript>();
+		bulletShotTime_ = Time.time;
 	}
     // Use this for initialization
     void Start () {
@@ -471,8 +475,19 @@ public class PlayerScript : MonoBehaviour {
 
     public void onShotKey()
     {
-
-    }
+		if (bulletShotTime_ + Constant.Time_BulletCoolTime > Time.time)
+			return;
+		GameObject obj = GameObject.FindGameObjectWithTag("GameController").GetComponent<GameManagerScript>().GetBulletInstance();
+		if (obj != null)
+		{
+			Vector3 bulletInitPos = new Vector3();
+			bulletInitPos = transform.position;
+			bulletInitPos.y += Constant.Position_Bullet_Start_Y;
+			obj.transform.position = bulletInitPos;
+			obj.SetActive(true);
+			bulletShotTime_ = Time.time;
+		}
+	}
 
 	//GM
 	public void OnRightBlockKey()

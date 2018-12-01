@@ -403,6 +403,7 @@ public class WorldScript : MonoBehaviour {
 		{
 
 			MapMonsterStruct mapMon = monsterList_[i];
+			
 			//너무 멀리 있는 오브젝트 패스
 			if (iDistance < mapMon.distance_ - Constant.Distance_ObjectAppear_)
 				break;
@@ -426,13 +427,22 @@ public class WorldScript : MonoBehaviour {
 				
 				mapMon.object_.SetActive(true);
 			}
-			
-			curPostionVector.x = calcMonsterXPos(mapMon.monsterType_, mapMon.horizonalPosition_, mapMon.distance_);
-			curPostionVector.y = mapMon.object_.GetComponent<MonsterScript>().CalcYPos();
-			curPostionVector.z = mapMon.object_.GetComponent<MonsterScript>().CalcZPos() ;
-			mapMon.object_.transform.position = curPostionVector;
-			Debug.Log("Monster ZPos :" + curPostionVector.z.ToString());
-			if (curPostionVector.z < -3.0f)
+			MonsterScript monScript = mapMon.object_.GetComponent<MonsterScript>();
+			if (monScript.monsterState_ == Constant.MonsterState.Active)
+			{
+				curPostionVector.x = calcMonsterXPos(mapMon.monsterType_, mapMon.horizonalPosition_, mapMon.distance_);
+				curPostionVector.y = monScript.CalcYPos();
+				curPostionVector.z = monScript.CalcZPos();
+				mapMon.object_.transform.position = curPostionVector;
+				//
+				Debug.Log("Monster ZPos :" + curPostionVector.z.ToString());
+
+			}
+			if (curPostionVector.z < -3.0f
+				|| ((monScript.monsterState_ == Constant.MonsterState.Die) 
+					&& Time.time - monScript.dieTime_ > 2.0f
+					)
+				)
 			{
 				if (mapMon.object_ != null)
 				{
@@ -448,6 +458,7 @@ public class WorldScript : MonoBehaviour {
 		}
 
 	}
+	
 	// 현재 거리 갱신
 	public void updateDistance(int speed)
     {

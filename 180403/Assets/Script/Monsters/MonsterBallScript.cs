@@ -13,6 +13,20 @@ public class MonsterBallScript : MonsterScript {
 	void Update () {
 		
 	}
+
+	private void FixedUpdate()
+	{
+		if (monsterState_ == Constant.MonsterState.Active)
+		{
+
+			Vector3 moveVector = new Vector3();
+			moveVector = Vector3.zero;
+
+			moveVector.z = zMoveSpeed_;
+
+		}
+		//GetComponent<Rigidbody>().AddForce(moveVector, ForceMode.Impulse);
+	}
 	/*
 	public override void UpdateInterpolatePos(float frameMovedDist)
 	{
@@ -21,6 +35,7 @@ public class MonsterBallScript : MonsterScript {
 		return;
 	}
 	*/
+
 	public override float CalcYPos()
 	{
 		return CalcZPos() * 0.3f * 0.25f;

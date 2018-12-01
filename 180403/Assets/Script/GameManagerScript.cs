@@ -164,7 +164,7 @@ public class GameManagerScript : MonoBehaviour {
 		}
 		for (int i = 0; i < BULLET_INSCREEN_MAX_NUM; ++i)
 		{
-			bulletPool_[i] = Instantiate(fish_, Vector3.zero, Quaternion.identity) as GameObject;
+			bulletPool_[i] = Instantiate(bullet_, Vector3.zero, Quaternion.identity) as GameObject;
 			bulletPool_[i].SetActive(false);
 		}
 
@@ -278,6 +278,11 @@ public class GameManagerScript : MonoBehaviour {
 		fishObj.SetActive(false);
 		fishObj.transform.position = Vector3.zero;
     }
+	public void OnCollideBullet(GameObject obj)
+	{
+		obj.SetActive(false);
+		obj.transform.position = Vector3.zero;
+	}
 	public void OnEnterShop(GameObject shopObj, Constant.MapObjects shopType)
 	{
 		shopScript_.SetShopType(shopType);
@@ -521,7 +526,7 @@ public class GameManagerScript : MonoBehaviour {
 	{
 		if (getCurrentStage() >= 2)
 		{
-			SceneManager.LoadScene("Title_Screen");
+			SceneManager.LoadScene("TitleScreen");
 		}
 		else
 		{
