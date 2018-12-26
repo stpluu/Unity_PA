@@ -44,7 +44,7 @@ static partial class Constant
 }
 public class WorldScript : MonoBehaviour {
     
-    enum StageStyle
+    public enum StageStyle
     {
         SpringForest,
         WinterForest,
@@ -80,6 +80,7 @@ public class WorldScript : MonoBehaviour {
 		{
 			bReady_ = bReady;
 		}
+		public bool isPassed_;
     };
 
 	[System.Serializable]
@@ -104,7 +105,10 @@ public class WorldScript : MonoBehaviour {
 	private int speedKeyInputTime_;     //스피드 업/다운 키를 누른 시간
 
 	bool bGoal_;						//스테이지 목표에 도착 했는가?
-
+	public StageStyle GetStageStyle()
+	{
+		return stageStyle_;
+	}
 	public bool SetStageStyle(string stageType)
 	{
 		if (stageType.Equals("spring_forest"))
@@ -272,6 +276,7 @@ public class WorldScript : MonoBehaviour {
 		obj.distance_ = distance;
 		obj.horizonalPosition_ = hPos;
 		obj.bReady_ = false;
+		obj.isPassed_ = false;
 		objectList_.Add(obj);
 		
 		return true;
@@ -332,7 +337,13 @@ public class WorldScript : MonoBehaviour {
 	void Update () {
 		
 	}
-        
+    private bool IsItemObject(Constant.MapObjects objType)
+	{
+		if (objType == Constant.MapObjects.HEART
+			|| objType == Constant.MapObjects.WING)
+			return true;
+		return false;
+	}
     private void updateObjectPosition()
     {
         int iDistance = (int)distance_;
@@ -342,20 +353,34 @@ public class WorldScript : MonoBehaviour {
 		{
 
 			MapObjectStruct mapObj = objectList_[i];
-            //너무 멀리 있는 오브젝트 패스
-            if (iDistance < mapObj.distance_ - Constant.Distance_ObjectAppear_)
-                break ;
-			if (iDistance > mapObj.distance_ + Constant.Distance_ObjectDisappear)
-			{
-				if (mapObj.object_ != null)
-				{
-					mapObj.object_.SetActive(false);
-					Debug.Log("object deactived : " + mapObj.distance_.ToString() + " type : " + mapObj.objectType_.ToString());
-					mapObj.object_ = null;
-					objectList_[i] = mapObj;
-				}	
+			if (mapObj.isPassed_)
 				continue;
+			if (IsItemObject(mapObj.objectType_) == true)
+			{
+				if (iDistance < mapObj.distance_)
+					continue;
+				
 			}
+			else
+			{
+				//너무 멀리 있는 오브젝트 패스
+				if (iDistance < mapObj.distance_ - Constant.Distance_ObjectAppear_)
+					break;
+				if (iDistance > mapObj.distance_ + Constant.Distance_ObjectDisappear)
+				{
+					if (mapObj.object_ != null)
+					{
+						mapObj.object_.SetActive(false);
+						Debug.Log("object deactived : " + mapObj.distance_.ToString() + " type : " + mapObj.objectType_.ToString());
+						mapObj.object_ = null;
+						mapObj.isPassed_ = true;
+						objectList_[i] = mapObj;
+						
+					}
+					continue;
+				}
+			}
+           
 
 			// 여기서부턴 거리에 들어와있는 오브젝트들
 			if (mapObj.object_ == null)
@@ -377,10 +402,18 @@ public class WorldScript : MonoBehaviour {
 				}
 				mapObj.object_.SetActive(true);
 			}
-			curPostionVector.x = calcObjectXPos(mapObj.objectType_, mapObj.horizonalPosition_, mapObj.distance_);
-            curPostionVector.y = calcObjectYPos(mapObj.objectType_, mapObj.distance_);
-            curPostionVector.z = calcObjectZpos(mapObj.objectType_, mapObj.distance_);
-			mapObj.object_.transform.position = curPostionVector;
+			if (IsItemObject(mapObj.objectType_))
+			{
+				mapObj.isPassed_ = true;
+			}
+			else
+			{
+				curPostionVector.x = calcObjectXPos(mapObj.objectType_, mapObj.horizonalPosition_, mapObj.distance_);
+				curPostionVector.y = calcObjectYPos(mapObj.objectType_, mapObj.distance_);
+				curPostionVector.z = calcObjectZpos(mapObj.objectType_, mapObj.distance_);
+				mapObj.object_.transform.position = curPostionVector;
+			}
+			
 			objectList_[i] = mapObj;
         }
         

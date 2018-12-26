@@ -7485,7 +7485,7 @@ Animator:
   m_Controller: {fileID: 9100000, guid: 67726752585f8354caa70e73df1fe689, type: 2}
   m_CullingMode: 0
   m_UpdateMode: 0
-  m_ApplyRootMotion: 0
+  m_ApplyRootMotion: 1
   m_LinearVelocityBlending: 0
   m_WarningMessage: 
   m_HasTransformHierarchy: 1
@@ -7577,6 +7577,9 @@ MonoBehaviour:
   inHoleTime_: 0
   stateStartTime_: 0
   stopJumpCount_: 0
+  bulletShotTime_: 0
+  invincibleStartTime_: 0
+  InvincibleEndTime_: 0
 --- !u!65 &1699492031
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -8666,7 +8669,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   fish_: {fileID: 1721530876860356, guid: ffdfe33db2089c84faef5eb0a09375ed, type: 2}
   bullet_: {fileID: 1862636640412888, guid: 2e1d84fdd2f483a459809d4eea1b90a5, type: 2}
-  heart_: {fileID: 0}
+  heart_: {fileID: 1005725315369174, guid: c76dd884eee86344e9bd9cde9024d74b, type: 2}
   large_hole_: {fileID: 1206772065564064, guid: fd4e582cb6ddc734e87336a794a58fee,
     type: 2}
   fish_hole_: {fileID: 1241779842671916, guid: eba90877cd49b994d93b6782910bd5aa, type: 2}
@@ -8684,6 +8687,7 @@ MonoBehaviour:
   monsterSquid_: {fileID: 0}
   fishPool_: []
   bulletPool_: []
+  heartPool_: []
   largeHolePool_: []
   fishHolePool_: []
   crackPool_: []

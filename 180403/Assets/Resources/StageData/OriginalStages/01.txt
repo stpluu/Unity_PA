@@ -6,14 +6,14 @@ distance=600
 // 스테이지 정보
 // 나타나는 위치(캐릭터에 닿는 위치 기준, 실제로는 일정거리 먼저 등장), 오브젝트 종류, x축 위치
 <objects>
-30,shop_normal,-1
+30,heart,0
 45,fish_hole,-1
 51,fish_hole,1
 57,fish_hole,-1
 63,fish_hole,1
 69,fish_hole,-1
 75,fish_hole,1
-//91,heart,0
+91,heart,0
 93,fish_hole,-1
 99,fish_hole,1
 105,fish_hole,-1

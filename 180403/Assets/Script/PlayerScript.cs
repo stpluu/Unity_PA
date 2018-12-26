@@ -38,6 +38,8 @@ static partial class Constant
 	public const int Max_BulletCount = 3;
 	public const float Time_BulletCoolTime = 0.5f;
 
+	public const float Time_Invincible = 20.0f;
+
 };
 
 public class PlayerScript : MonoBehaviour {
@@ -92,12 +94,14 @@ public class PlayerScript : MonoBehaviour {
     public float stateStartTime_;
     public int stopJumpCount_;  //구멍에 걸렸을때 자동으로 점프한 횟수.
 	public float bulletShotTime_;
+	public float invincibleStartTime_;
 
 	private GameObject LastCollideObject_;
 	private Constant.MapObjects enterShopType_;
 	private GameManagerScript gameManagerScript_;
     Animator animator_;
 
+	public float InvincibleEndTime_;
 	
     void Awake()
     {
@@ -107,6 +111,7 @@ public class PlayerScript : MonoBehaviour {
 		LastCollideObject_ = null;
 		gameManagerScript_ = GameObject.Find("GameManager").GetComponent<GameManagerScript>();
 		bulletShotTime_ = Time.time;
+		invincibleStartTime_ = 0.0f;
 	}
     // Use this for initialization
     void Start () {
@@ -123,6 +128,7 @@ public class PlayerScript : MonoBehaviour {
         updateCharacterState();
         UpdateSpeed();
 
+		UpdateEffect();
 
     }
 
@@ -271,6 +277,11 @@ public class PlayerScript : MonoBehaviour {
 						reservedMovingDirection_ = 0;
 					}
 				
+				}
+				if (characterState_ == CharacterStates.JUMP_DOWN
+					|| characterState_ == CharacterStates.JUMP_UP)
+				{
+					gameManagerScript_.ChangeHeartColor();
 				}
                 characterPosition_.y = 0.0f;
                 break;
@@ -610,7 +621,14 @@ public class PlayerScript : MonoBehaviour {
         animator_.SetFloat("playerSpeed", (speed_ / Constant.Speed_Max_Lv1));
     }
 
-
+	private void UpdateEffect()
+	{
+		//RuntimeAnimatorController ac = gameObject.GetComponent<Animator>().runtimeAnimatorController;
+		//gameObject.GetComponent<Animator>().runtimeAnimatorController = null;
+		//
+		//gameObject.GetComponent<Animator>().color = new Color(0.4f, 0.6f, 1f);
+		//gameObject.GetComponent().runtimeAnimatorController = ac;
+	}
 
     private float calcJumpHeight(float jumpDeltaTime)
     {
@@ -784,5 +802,14 @@ public class PlayerScript : MonoBehaviour {
 		if (gameManagerScript_.hasItem(Constant.ItemDef.FlyingCap))
 			return Constant.Time_JumpLv2;
 		return Constant.Time_JumpLv1;
+	}
+
+	public float GetInvincibleRemainTime()
+	{
+		return Time.time - InvincibleEndTime_;
+	}
+	public bool IsInvincible()
+	{
+		return GetInvincibleRemainTime() > 0.0f;
 	}
 }

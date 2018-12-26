@@ -31,7 +31,7 @@ public class MonsterScript : MonoBehaviour {
 		if (monsterState_ == Constant.MonsterState.Die
 			&& Time.time - dieTime_ > 2.0f)
 		{
-			
+			gameObject.SetActive(false);
 		}
 	}
 	public virtual void UpdateInterpolatePos(float frameMovedDist)

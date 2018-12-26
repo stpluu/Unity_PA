@@ -32,6 +32,7 @@ public class GameManagerScript : MonoBehaviour {
 	// Item / monster / bullet pool
     public GameObject[] fishPool_;
 	public GameObject[] bulletPool_;
+	public GameObject[] heartPool_;
 
 	// MapObject Pool
 	public GameObject[] largeHolePool_;
@@ -43,6 +44,7 @@ public class GameManagerScript : MonoBehaviour {
 	public GameObject goalObject_;
 
 	private const int FISH_INSCREEN_MAX_NUM = 10;
+	private const int HEART_INSCREEN_MAX_NUM = 4;
 	private const int LARGE_HOLE_INSCREEN_MAX_NUM = 7;
 	private const int CRACK_INSCREEN_MAX_NUM = 7;
 	private const int FISH_HOLE_INSCREEN_MAX_NUM = 7;
@@ -121,6 +123,7 @@ public class GameManagerScript : MonoBehaviour {
         // create object instanace
         fishPool_ = new GameObject[FISH_INSCREEN_MAX_NUM];
 		bulletPool_ = new GameObject[BULLET_INSCREEN_MAX_NUM];
+		heartPool_ = new GameObject[HEART_INSCREEN_MAX_NUM];
 
 		largeHolePool_ = new GameObject[LARGE_HOLE_INSCREEN_MAX_NUM];
 		fishHolePool_ = new GameObject[FISH_HOLE_INSCREEN_MAX_NUM];
@@ -162,12 +165,18 @@ public class GameManagerScript : MonoBehaviour {
 			fishPool_[i] = Instantiate(fish_, Vector3.zero, Quaternion.identity) as GameObject;
 			fishPool_[i].SetActive(false);
 		}
+
 		for (int i = 0; i < BULLET_INSCREEN_MAX_NUM; ++i)
 		{
 			bulletPool_[i] = Instantiate(bullet_, Vector3.zero, Quaternion.identity) as GameObject;
 			bulletPool_[i].SetActive(false);
 		}
 
+		for (int i = 0; i < HEART_INSCREEN_MAX_NUM; ++i)
+		{
+			heartPool_[i] = Instantiate(heart_, Vector3.zero, Quaternion.identity) as GameObject;
+			heartPool_[i].SetActive(false);
+		}
 		for (int i = 0; i < LARGE_HOLE_INSCREEN_MAX_NUM; ++i)
 		{
 			largeHolePool_[i] = Instantiate(large_hole_, Vector3.zero, Quaternion.identity) as GameObject;
@@ -283,6 +292,40 @@ public class GameManagerScript : MonoBehaviour {
 		obj.SetActive(false);
 		obj.transform.position = Vector3.zero;
 	}
+	public void OnCollideHeart(GameObject heartObj, Constant.HeartColor heartColor)
+	{
+		heartObj.SetActive(false);
+		heartObj.transform.position = Vector3.zero;
+		switch(heartColor)
+		{
+			case Constant.HeartColor.Purple:
+				AddFish(2);
+				break;
+			case Constant.HeartColor.Green:
+				AddFish(5);
+				break;
+			case Constant.HeartColor.Sky:
+				AddFish(10);
+				break;
+			case Constant.HeartColor.Yellow:
+				AddFish(20);
+				break;
+			default:
+				break;
+		}
+	}
+	public void ChangeHeartColor()
+	{
+		foreach (GameObject obj in heartPool_)
+		{
+			if (obj.activeSelf == true)
+			{
+				HeartScript script = obj.GetComponent<HeartScript>();
+				if(script != null)
+				{ script.ChangeToNextColor(); }
+			}
+		}
+	}
 	public void OnEnterShop(GameObject shopObj, Constant.MapObjects shopType)
 	{
 		shopScript_.SetShopType(shopType);
@@ -351,6 +394,10 @@ public class GameManagerScript : MonoBehaviour {
 				{
 					return goalObject_;
 				}
+			case Constant.MapObjects.HEART:
+				{
+					return GetHeartInstance();
+				}
 			default:
 				// not yet ... return crack object
 				foreach (GameObject obj in crackPool_)
@@ -402,6 +449,17 @@ public class GameManagerScript : MonoBehaviour {
 	public GameObject GetBulletInstance()
 	{
 		foreach (GameObject obj in bulletPool_)
+		{
+			if (obj.activeSelf == false)
+			{
+				return obj;
+			}
+		}
+		return null;
+	}
+	public GameObject GetHeartInstance()
+	{
+		foreach (GameObject obj in heartPool_)
 		{
 			if (obj.activeSelf == false)
 			{
