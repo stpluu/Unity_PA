@@ -77,7 +77,8 @@ public class SlotMachineScript : MonoBehaviour {
 					updateTime_[i] = Time.time;
 				}
 			}
-			if (Time.time - endTime_ > Constant.resultHoldTime)
+			if (currentSlotMachineState_ == Constant.SlotMachineState.result
+				&& Time.time - endTime_ > Constant.resultHoldTime)
 			{
 				SetSlotMachineState(Constant.SlotMachineState.end);
 			}
